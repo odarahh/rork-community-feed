@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import { Mic, Smile } from 'lucide-react-native';
+import { Mic, Smile, Send } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { Comment } from '@/types/feed';
 import { currentUser } from '@/mocks/feedData';
@@ -79,6 +79,13 @@ function CommentItem({ comment, isReply = false }: CommentItemProps) {
 export default function CommentSection({ comments }: CommentSectionProps) {
   const [commentText, setCommentText] = useState('');
 
+  const handleSubmitComment = () => {
+    if (commentText.trim()) {
+      console.log('Submitting comment:', commentText);
+      setCommentText('');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.inputContainer}>
@@ -99,6 +106,14 @@ export default function CommentSection({ comments }: CommentSectionProps) {
             <TouchableOpacity style={styles.inputAction}>
               <Mic size={20} color={Colors.mutedForeground} />
             </TouchableOpacity>
+            {commentText.trim().length > 0 && (
+              <TouchableOpacity 
+                style={styles.submitButton} 
+                onPress={handleSubmitComment}
+              >
+                <Send size={20} color={Colors.blue} />
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       </View>
@@ -150,6 +165,9 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   inputAction: {
+    padding: 4,
+  },
+  submitButton: {
     padding: 4,
   },
   commentsContainer: {
