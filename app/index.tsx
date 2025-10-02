@@ -69,6 +69,14 @@ export default function FeedScreen() {
     );
   };
 
+  const handleToggleComments = (postId: string) => {
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId ? { ...post, commentsDisabled: !post.commentsDisabled } : post
+      )
+    );
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
@@ -102,6 +110,7 @@ export default function FeedScreen() {
             onToggleLike={handleToggleLike}
             onToggleSave={handleToggleSave}
             onTogglePin={handleTogglePin}
+            onToggleComments={handleToggleComments}
           />
         ))}
       </ScrollView>

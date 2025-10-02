@@ -6,7 +6,11 @@ import {
   Image,
   TouchableOpacity,
   Animated,
+  Modal,
+  ScrollView,
+  Dimensions,
 } from 'react-native';
+import { Video, ResizeMode, AVPlaybackStatus } from 'expo-av';
 import {
   Heart,
   MessageCircle,
@@ -15,6 +19,14 @@ import {
   MoreVertical,
   Pin,
   Bookmark,
+  FileText,
+  Download,
+  Play,
+
+  X,
+  ChevronLeft,
+  ChevronRight,
+  MessageCircleOff,
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { Post, Attachment } from '@/types/feed';
@@ -26,19 +38,27 @@ type PostCardProps = {
   onToggleLike: (postId: string) => void;
   onToggleSave: (postId: string) => void;
   onTogglePin: (postId: string) => void;
+  onToggleComments: (postId: string) => void;
 };
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 export default function PostCard({
   post,
   onToggleLike,
   onToggleSave,
   onTogglePin,
+  onToggleComments,
 }: PostCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [likeScale] = useState(new Animated.Value(1));
   const [localComments, setLocalComments] = useState(post.comments);
   const [commentsCount, setCommentsCount] = useState(post.commentsCount);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [showFullImage, setShowFullImage] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const videoRef = React.useRef<Video>(null);
 
   const heartReaction = post.reactions.find((r) => r.type === '❤️');
   const isLiked = heartReaction?.userReacted || false;
@@ -151,20 +171,115 @@ export default function PostCard({
         </TouchableOpacity>
       </View>
 
+      {post.media?.type === 'banner' && (
+        <View style={styles.bannerContainer}>
+          <Image
+            source={{ uri: post.media.url as string }}
+            style={styles.bannerImage}
+            resizeMode="cover"
+          />
+        </View>
+      )}
+
       <View style={styles.content}>
+        {post.title && <Text style={styles.titleText}>{post.title}</Text>}
         <Text style={styles.contentText}>{post.content}</Text>
       </View>
 
-      {post.media && (
-        <View style={styles.mediaContainer}>
+      {post.media && post.media.type === 'image' && (
+        <TouchableOpacity 
+          style={styles.mediaContainer}
+          onPress={() => {
+            setSelectedImageIndex(0);
+            setShowFullImage(true);
+          }}
+        >
           <Image
-            source={{ uri: post.media.url }}
+            source={{ uri: post.media.url as string }}
             style={styles.mediaImage}
             resizeMode="cover"
           />
           {post.media.caption && (
             <Text style={styles.mediaCaption}>{post.media.caption}</Text>
           )}
+        </TouchableOpacity>
+      )}
+
+      {post.media && post.media.type === 'video' && (
+        <View style={styles.videoContainer}>
+          <Video
+            ref={videoRef}
+            source={{ uri: post.media.url as string }}
+            style={styles.video}
+            resizeMode={ResizeMode.CONTAIN}
+            isLooping
+            shouldPlay={isPlaying}
+            onPlaybackStatusUpdate={(status: AVPlaybackStatus) => {
+              if (status.isLoaded) {
+                setIsPlaying(status.isPlaying);
+              }
+            }}
+          />
+          <TouchableOpacity
+            style={styles.videoOverlay}
+            onPress={() => {
+              if (isPlaying) {
+                videoRef.current?.pauseAsync();
+              } else {
+                videoRef.current?.playAsync();
+              }
+            }}
+          >
+            {!isPlaying && (
+              <View style={styles.playButton}>
+                <Play size={40} color={Colors.primaryForeground} fill={Colors.primaryForeground} />
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {post.media && post.media.type === 'gallery' && Array.isArray(post.media.url) && (
+        <View style={styles.galleryContainer}>
+          <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false}>
+            {post.media.url.map((imageUrl, index) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  setSelectedImageIndex(index);
+                  setShowFullImage(true);
+                }}
+              >
+                <Image
+                  source={{ uri: imageUrl }}
+                  style={styles.galleryImage}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          <View style={styles.galleryIndicator}>
+            <Text style={styles.galleryIndicatorText}>
+              {1}/{post.media.url.length}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {post.media && post.media.type === 'file' && (
+        <View style={styles.fileContainer}>
+          <View style={styles.fileContent}>
+            <FileText size={32} color={Colors.blue} />
+            <View style={styles.fileInfo}>
+              <Text style={styles.fileName}>{post.media.fileName}</Text>
+              {post.media.fileSize && (
+                <Text style={styles.fileSize}>{post.media.fileSize}</Text>
+              )}
+            </View>
+          </View>
+          <TouchableOpacity style={styles.downloadButton}>
+            <Download size={20} color={Colors.blue} />
+          </TouchableOpacity>
         </View>
       )}
 
@@ -206,9 +321,15 @@ export default function PostCard({
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => setShowComments(!showComments)}
+          disabled={post.commentsDisabled}
         >
-          <MessageCircle size={20} color={Colors.mutedForeground} />
-          <Text style={styles.actionText}>Comentar</Text>
+          <MessageCircle 
+            size={20} 
+            color={post.commentsDisabled ? Colors.mutedForeground : Colors.mutedForeground} 
+          />
+          <Text style={[styles.actionText, post.commentsDisabled && styles.disabledText]}>
+            Comentar
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton}>
@@ -224,9 +345,83 @@ export default function PostCard({
       {showComments && (
         <>
           <View style={styles.divider} />
-          <CommentSection comments={localComments} onAddComment={handleAddComment} />
+          {post.commentsDisabled ? (
+            <View style={styles.commentsDisabledContainer}>
+              <MessageCircleOff size={32} color={Colors.mutedForeground} />
+              <Text style={styles.commentsDisabledTitle}>Comentários desabilitados</Text>
+              <Text style={styles.commentsDisabledText}>
+                O autor desabilitou os comentários nesta postagem.
+              </Text>
+              <TouchableOpacity 
+                style={styles.enableCommentsButton}
+                onPress={() => onToggleComments(post.id)}
+              >
+                <Text style={styles.enableCommentsButtonText}>Reativar comentários</Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <CommentSection comments={localComments} onAddComment={handleAddComment} />
+          )}
         </>
       )}
+
+      <Modal
+        visible={showFullImage}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowFullImage(false)}
+      >
+        <View style={styles.fullImageModal}>
+          <TouchableOpacity
+            style={styles.closeButton}
+            onPress={() => setShowFullImage(false)}
+          >
+            <X size={24} color={Colors.primaryForeground} />
+          </TouchableOpacity>
+          
+          {post.media && (
+            <>
+              <Image
+                source={{ 
+                  uri: Array.isArray(post.media.url) 
+                    ? post.media.url[selectedImageIndex] 
+                    : post.media.url as string 
+                }}
+                style={styles.fullImage}
+                resizeMode="contain"
+              />
+              
+              {Array.isArray(post.media.url) && post.media.url.length > 1 && (
+                <>
+                  {selectedImageIndex > 0 && (
+                    <TouchableOpacity
+                      style={[styles.navButton, styles.navButtonLeft]}
+                      onPress={() => setSelectedImageIndex(selectedImageIndex - 1)}
+                    >
+                      <ChevronLeft size={32} color={Colors.primaryForeground} />
+                    </TouchableOpacity>
+                  )}
+                  
+                  {selectedImageIndex < post.media.url.length - 1 && (
+                    <TouchableOpacity
+                      style={[styles.navButton, styles.navButtonRight]}
+                      onPress={() => setSelectedImageIndex(selectedImageIndex + 1)}
+                    >
+                      <ChevronRight size={32} color={Colors.primaryForeground} />
+                    </TouchableOpacity>
+                  )}
+                  
+                  <View style={styles.imageCounter}>
+                    <Text style={styles.imageCounterText}>
+                      {selectedImageIndex + 1} / {post.media.url.length}
+                    </Text>
+                  </View>
+                </>
+              )}
+            </>
+          )}
+        </View>
+      </Modal>
 
       <PostMenu
         visible={showMenu}
@@ -234,6 +429,7 @@ export default function PostCard({
         post={post}
         onToggleSave={onToggleSave}
         onTogglePin={onTogglePin}
+        onToggleComments={onToggleComments}
       />
     </View>
   );
@@ -414,5 +610,178 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600' as const,
     color: Colors.mutedForeground,
+  },
+  disabledText: {
+    opacity: 0.5,
+  },
+  bannerContainer: {
+    width: '100%',
+    height: 200,
+    marginBottom: 12,
+  },
+  bannerImage: {
+    width: '100%',
+    height: '100%',
+  },
+  titleText: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: Colors.primary,
+    marginBottom: 8,
+  },
+  videoContainer: {
+    marginTop: 8,
+    position: 'relative',
+  },
+  video: {
+    width: '100%',
+    height: 300,
+    backgroundColor: Colors.primary,
+  },
+  videoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  playButton: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  galleryContainer: {
+    marginTop: 8,
+    position: 'relative',
+  },
+  galleryImage: {
+    width: SCREEN_WIDTH - 32,
+    height: 300,
+  },
+  galleryIndicator: {
+    position: 'absolute',
+    bottom: 12,
+    right: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  galleryIndicatorText: {
+    color: Colors.primaryForeground,
+    fontSize: 12,
+    fontWeight: '600' as const,
+  },
+  fileContainer: {
+    marginTop: 8,
+    marginHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: Colors.muted,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  fileContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flex: 1,
+  },
+  fileInfo: {
+    flex: 1,
+    gap: 4,
+  },
+  fileName: {
+    fontSize: 15,
+    fontWeight: '600' as const,
+    color: Colors.primary,
+  },
+  fileSize: {
+    fontSize: 13,
+    color: Colors.mutedForeground,
+  },
+  downloadButton: {
+    padding: 8,
+  },
+  commentsDisabledContainer: {
+    paddingVertical: 32,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+    gap: 12,
+  },
+  commentsDisabledTitle: {
+    fontSize: 16,
+    fontWeight: '700' as const,
+    color: Colors.primary,
+    marginTop: 8,
+  },
+  commentsDisabledText: {
+    fontSize: 14,
+    color: Colors.mutedForeground,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  enableCommentsButton: {
+    marginTop: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: Colors.blue,
+    borderRadius: 8,
+  },
+  enableCommentsButtonText: {
+    fontSize: 14,
+    fontWeight: '600' as const,
+    color: Colors.primaryForeground,
+  },
+  fullImageModal: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullImage: {
+    width: SCREEN_WIDTH,
+    height: '100%',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    zIndex: 10,
+    padding: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+  },
+  navButton: {
+    position: 'absolute',
+    top: '50%',
+    padding: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  navButtonLeft: {
+    left: 20,
+  },
+  navButtonRight: {
+    right: 20,
+  },
+  imageCounter: {
+    position: 'absolute',
+    bottom: 40,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  imageCounterText: {
+    color: Colors.primaryForeground,
+    fontSize: 14,
+    fontWeight: '600' as const,
   },
 });

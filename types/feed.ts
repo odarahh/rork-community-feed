@@ -10,9 +10,12 @@ export type MediaType = 'banner' | 'image' | 'video' | 'file' | 'gallery';
 
 export type Media = {
   type: MediaType;
-  url: string;
+  url: string | string[];
   thumbnail?: string;
   caption?: string;
+  title?: string;
+  fileName?: string;
+  fileSize?: string;
 };
 
 export type Reaction = {
@@ -44,6 +47,7 @@ export type Post = {
   author: User;
   timestamp: string;
   location?: string;
+  title?: string;
   content: string;
   media?: Media;
   reactions: Reaction[];

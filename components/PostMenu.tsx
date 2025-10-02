@@ -15,6 +15,7 @@ import {
   PinOff,
   Settings,
   MessageCircleOff,
+  MessageCircle,
   Trash2,
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
@@ -26,6 +27,7 @@ type PostMenuProps = {
   post: Post;
   onToggleSave: (postId: string) => void;
   onTogglePin: (postId: string) => void;
+  onToggleComments: (postId: string) => void;
 };
 
 type MenuItemProps = {
@@ -57,6 +59,7 @@ export default function PostMenu({
   post,
   onToggleSave,
   onTogglePin,
+  onToggleComments,
 }: PostMenuProps) {
   const handleAction = (action: () => void) => {
     action();
@@ -109,13 +112,19 @@ export default function PostMenu({
           />
 
           <MenuItem
-            icon={<MessageCircleOff size={20} color={Colors.mutedForeground} />}
+            icon={
+              post.commentsDisabled ? (
+                <MessageCircle size={20} color={Colors.mutedForeground} />
+              ) : (
+                <MessageCircleOff size={20} color={Colors.mutedForeground} />
+              )
+            }
             label={
               post.commentsDisabled
                 ? 'Ativar comentários'
                 : 'Desativar comentários'
             }
-            onPress={() => handleAction(() => console.log('Toggle comments'))}
+            onPress={() => handleAction(() => onToggleComments(post.id))}
           />
 
           <View style={styles.divider} />
