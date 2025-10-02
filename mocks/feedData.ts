@@ -1,0 +1,216 @@
+import { Post, User } from '@/types/feed';
+
+export const currentUser: User = {
+  id: 'current-user',
+  name: 'Você',
+  avatar: 'https://i.pravatar.cc/150?img=1',
+};
+
+export const mockPosts: Post[] = [
+  {
+    id: '1',
+    author: {
+      id: '2',
+      name: 'Maria Silva',
+      avatar: 'https://i.pravatar.cc/150?img=5',
+      role: 'Terapeuta de produtividade',
+    },
+    timestamp: '2 horas atrás',
+    location: 'Produtividade',
+    content: 'Compartilhando uma técnica incrível que tem transformado a rotina dos meus clientes! 🚀\n\nA regra dos 2 minutos: se algo leva menos de 2 minutos para fazer, faça imediatamente. Isso evita acúmulo de tarefas pequenas que consomem energia mental. Quem já tentou essa técnica? Compartilhe nos comentários sua experiência!',
+    reactions: [
+      { type: '👍', count: 156, userReacted: false },
+      { type: '❤️', count: 142, userReacted: true },
+      { type: '💡', count: 30, userReacted: false },
+    ],
+    totalReactions: 328,
+    commentsCount: 84,
+    comments: [
+      {
+        id: 'c1',
+        author: {
+          id: '3',
+          name: 'João Santos',
+          avatar: 'https://i.pravatar.cc/150?img=12',
+        },
+        content: 'Uso essa técnica há 6 meses e mudou completamente minha produtividade! Recomendo demais 💪',
+        timestamp: '1 hora atrás',
+        likes: 12,
+        userLiked: false,
+        replies: [
+          {
+            id: 'c1-r1',
+            author: {
+              id: '2',
+              name: 'Maria Silva',
+              avatar: 'https://i.pravatar.cc/150?img=5',
+              role: 'Terapeuta de produtividade',
+            },
+            content: 'Que ótimo ouvir isso, João! Continue assim! 🎉',
+            timestamp: '45 min atrás',
+            likes: 3,
+            userLiked: false,
+          },
+        ],
+      },
+      {
+        id: 'c2',
+        author: {
+          id: '4',
+          name: 'Ana Costa',
+          avatar: 'https://i.pravatar.cc/150?img=9',
+        },
+        content: 'Vou começar a aplicar hoje mesmo! Obrigada pela dica 🙏',
+        timestamp: '30 min atrás',
+        likes: 5,
+        userLiked: true,
+      },
+    ],
+    shares: 45,
+    views: 1240,
+    isPinned: true,
+  },
+  {
+    id: '2',
+    author: {
+      id: '5',
+      name: 'Comunidade Selvagem',
+      avatar: 'https://i.pravatar.cc/150?img=8',
+      isAdmin: true,
+    },
+    timestamp: '30 min atrás',
+    location: 'Anúncios',
+    content: '🎓 Lançamento da Nova Plataforma de Aprendizado\n\nEstamos empolgados em anunciar o lançamento oficial da nossa nova plataforma de aprendizado colaborativo! Após meses de desenvolvimento e feedback da comunidade, criamos um espaço onde conhecimento e conexões se encontram. Explore cursos interativos, participe de discussões em tempo real e construa projetos incríveis junto com outros membros. O futuro do aprendizado começa agora! 🚀✨',
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800&q=80',
+      caption: 'Nova Plataforma de Aprendizado',
+    },
+    reactions: [
+      { type: '🎉', count: 456, userReacted: true },
+      { type: '❤️', count: 312, userReacted: false },
+      { type: '🔥', count: 124, userReacted: false },
+    ],
+    totalReactions: 892,
+    commentsCount: 156,
+    comments: [
+      {
+        id: 'c3',
+        author: {
+          id: '6',
+          name: 'Pedro Lima',
+          avatar: 'https://i.pravatar.cc/150?img=13',
+        },
+        content: 'Mal posso esperar para explorar! Quando começa? 🤩',
+        timestamp: '15 min atrás',
+        likes: 8,
+        userLiked: false,
+      },
+    ],
+    shares: 89,
+    views: 3450,
+  },
+  {
+    id: '3',
+    author: {
+      id: '7',
+      name: 'Ana Costa',
+      avatar: 'https://i.pravatar.cc/150?img=9',
+      role: 'UX Designer',
+    },
+    timestamp: '3 horas atrás',
+    location: 'Design',
+    content: '💭 Reflexão do dia: experiências digitais genuínas conectam pessoas? 🤔 Tenho pensado muito sobre como as conexões genuínas acontecem após um projeto apenas sobre fazer interfaces bonitas. Como vocês veem o papel do design nas conexões humanas? Compartilhe suas visões!',
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=800&q=80',
+      caption: 'Design Thinking',
+    },
+    reactions: [
+      { type: '💡', count: 98, userReacted: false },
+      { type: '❤️', count: 67, userReacted: false },
+      { type: '👍', count: 24, userReacted: false },
+    ],
+    totalReactions: 189,
+    commentsCount: 42,
+    comments: [
+      {
+        id: 'c4',
+        author: {
+          id: '8',
+          name: 'Carlos Mendes',
+          avatar: 'https://i.pravatar.cc/150?img=14',
+        },
+        content: 'Design é sobre empatia! Quando entendemos as pessoas, criamos experiências que realmente importam ❤️',
+        timestamp: '2 horas atrás',
+        likes: 15,
+        userLiked: true,
+      },
+    ],
+    shares: 23,
+    views: 890,
+    isSaved: true,
+  },
+  {
+    id: '4',
+    author: {
+      id: '9',
+      name: 'Roberto Alves',
+      avatar: 'https://i.pravatar.cc/150?img=11',
+      role: 'Chief Business Officer',
+    },
+    timestamp: '5 horas atrás',
+    location: 'Negócios',
+    content: '📊 Insights da semana: Os 3 pilares de um negócio sustentável\n\n1️⃣ Propósito claro - Saiba o porquê você existe\n2️⃣ Pessoas certas - Construa um time alinhado\n3️⃣ Processos eficientes - Otimize sem perder a essência\n\nQual desses pilares você está fortalecendo agora? Vamos trocar experiências! 💼',
+    reactions: [
+      { type: '👍', count: 234, userReacted: false },
+      { type: '💡', count: 89, userReacted: false },
+      { type: '🔥', count: 45, userReacted: false },
+    ],
+    totalReactions: 368,
+    commentsCount: 67,
+    comments: [],
+    shares: 56,
+    views: 2100,
+  },
+  {
+    id: '5',
+    author: {
+      id: '10',
+      name: 'Juliana Ferreira',
+      avatar: 'https://i.pravatar.cc/150?img=10',
+      role: 'Desenvolvedora Full Stack',
+    },
+    timestamp: '1 dia atrás',
+    location: 'Tecnologia',
+    content: '🚀 Acabei de lançar meu primeiro projeto open source!\n\nDepois de meses de trabalho, finalmente compartilho com a comunidade uma biblioteca que facilita a integração de APIs. Feedback é muito bem-vindo! Link nos comentários 👇\n\n#OpenSource #Desenvolvimento #Comunidade',
+    media: {
+      type: 'image',
+      url: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80',
+      caption: 'Código Open Source',
+    },
+    reactions: [
+      { type: '🎉', count: 156, userReacted: false },
+      { type: '👍', count: 98, userReacted: false },
+      { type: '🔥', count: 67, userReacted: false },
+    ],
+    totalReactions: 321,
+    commentsCount: 93,
+    comments: [
+      {
+        id: 'c5',
+        author: {
+          id: '11',
+          name: 'Lucas Oliveira',
+          avatar: 'https://i.pravatar.cc/150?img=15',
+        },
+        content: 'Parabéns pelo lançamento! Vou testar no meu projeto 🎉',
+        timestamp: '18 horas atrás',
+        likes: 7,
+        userLiked: false,
+      },
+    ],
+    shares: 78,
+    views: 1890,
+  },
+];

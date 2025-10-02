@@ -1,0 +1,52 @@
+export type User = {
+  id: string;
+  name: string;
+  avatar: string;
+  role?: string;
+  isAdmin?: boolean;
+};
+
+export type MediaType = 'banner' | 'image' | 'video' | 'file' | 'gallery';
+
+export type Media = {
+  type: MediaType;
+  url: string;
+  thumbnail?: string;
+  caption?: string;
+};
+
+export type Reaction = {
+  type: '👍' | '❤️' | '💡' | '🎉' | '🔥';
+  count: number;
+  userReacted: boolean;
+};
+
+export type Comment = {
+  id: string;
+  author: User;
+  content: string;
+  timestamp: string;
+  likes: number;
+  userLiked: boolean;
+  replies?: Comment[];
+};
+
+export type Post = {
+  id: string;
+  author: User;
+  timestamp: string;
+  location?: string;
+  content: string;
+  media?: Media;
+  reactions: Reaction[];
+  totalReactions: number;
+  commentsCount: number;
+  comments: Comment[];
+  shares: number;
+  views: number;
+  isPinned?: boolean;
+  isSaved?: boolean;
+  commentsDisabled?: boolean;
+};
+
+export type FilterType = 'all' | 'my-posts' | 'saved';
