@@ -213,7 +213,6 @@ export default function PostCard({
 
         <TouchableOpacity style={styles.actionButton}>
           <Share2 size={20} color={Colors.mutedForeground} />
-          <Text style={styles.actionText}>Compartilhar</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton}>

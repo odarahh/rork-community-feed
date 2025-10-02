@@ -74,7 +74,7 @@ function CommentItem({ comment, isReply = false, onReply }: CommentItemProps) {
           <Text style={styles.commentTimestamp}>{comment.timestamp}</Text>
           <TouchableOpacity onPress={handleLike} style={styles.likeButton}>
             <Heart
-              size={12}
+              size={16}
               color={liked ? Colors.red : Colors.mutedForeground}
               fill={liked ? Colors.red : 'transparent'}
             />
