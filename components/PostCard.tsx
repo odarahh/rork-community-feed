@@ -17,7 +17,7 @@ import {
   Bookmark,
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
-import { Post } from '@/types/feed';
+import { Post, Attachment } from '@/types/feed';
 import PostMenu from './PostMenu';
 import CommentSection from './CommentSection';
 
@@ -37,6 +37,8 @@ export default function PostCard({
   const [showMenu, setShowMenu] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [likeScale] = useState(new Animated.Value(1));
+  const [localComments, setLocalComments] = useState(post.comments);
+  const [commentsCount, setCommentsCount] = useState(post.commentsCount);
 
   const heartReaction = post.reactions.find((r) => r.type === '❤️');
   const isLiked = heartReaction?.userReacted || false;
@@ -55,6 +57,47 @@ export default function PostCard({
       }),
     ]).start();
     onToggleLike(post.id);
+  };
+
+  const handleAddComment = (content: string, attachments: Attachment[], replyToId?: string) => {
+    const newComment = {
+      id: `c-${Date.now()}`,
+      author: {
+        id: 'current-user',
+        name: 'Você',
+        avatar: 'https://i.pravatar.cc/150?img=1',
+      },
+      content,
+      timestamp: 'Agora',
+      likes: 0,
+      userLiked: false,
+      attachments: attachments.length > 0 ? attachments : undefined,
+    };
+
+    if (replyToId) {
+      const addReplyToComment = (comments: typeof localComments): typeof localComments => {
+        return comments.map((comment) => {
+          if (comment.id === replyToId) {
+            return {
+              ...comment,
+              replies: [...(comment.replies || []), newComment],
+            };
+          }
+          if (comment.replies) {
+            return {
+              ...comment,
+              replies: addReplyToComment(comment.replies),
+            };
+          }
+          return comment;
+        });
+      };
+      setLocalComments(addReplyToComment(localComments));
+    } else {
+      setLocalComments([...localComments, newComment]);
+    }
+    
+    setCommentsCount(commentsCount + 1);
   };
 
   return (
@@ -133,7 +176,7 @@ export default function PostCard({
           </View>
           <View style={styles.statItem}>
             <MessageCircle size={16} color={Colors.mutedForeground} />
-            <Text style={styles.statsText}>{post.commentsCount} comentários</Text>
+            <Text style={styles.statsText}>{commentsCount} comentários</Text>
           </View>
         </View>
       </View>
@@ -182,7 +225,7 @@ export default function PostCard({
       {showComments && (
         <>
           <View style={styles.divider} />
-          <CommentSection comments={post.comments} />
+          <CommentSection comments={localComments} onAddComment={handleAddComment} />
         </>
       )}
 

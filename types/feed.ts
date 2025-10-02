@@ -21,6 +21,13 @@ export type Reaction = {
   userReacted: boolean;
 };
 
+export type Attachment = {
+  id: string;
+  type: 'image' | 'pdf';
+  url: string;
+  name: string;
+};
+
 export type Comment = {
   id: string;
   author: User;
@@ -29,6 +36,7 @@ export type Comment = {
   likes: number;
   userLiked: boolean;
   replies?: Comment[];
+  attachments?: Attachment[];
 };
 
 export type Post = {
