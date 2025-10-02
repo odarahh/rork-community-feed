@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import { Mic, Smile, Send } from 'lucide-react-native';
+import { Paperclip, Send } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { Comment } from '@/types/feed';
 import { currentUser } from '@/mocks/feedData';
@@ -101,10 +101,7 @@ export default function CommentSection({ comments }: CommentSectionProps) {
           />
           <View style={styles.inputActions}>
             <TouchableOpacity style={styles.inputAction}>
-              <Smile size={20} color={Colors.mutedForeground} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.inputAction}>
-              <Mic size={20} color={Colors.mutedForeground} />
+              <Paperclip size={20} color={Colors.mutedForeground} />
             </TouchableOpacity>
             {commentText.trim().length > 0 && (
               <TouchableOpacity 
