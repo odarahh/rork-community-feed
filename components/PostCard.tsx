@@ -15,7 +15,6 @@ import {
   MoreVertical,
   Pin,
   Bookmark,
-  Eye,
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { Post } from '@/types/feed';
@@ -127,19 +126,15 @@ export default function PostCard({
       )}
 
       <View style={styles.stats}>
-        <View style={styles.reactionsContainer}>
-          {post.reactions.slice(0, 3).map((reaction) => (
-            <Text key={reaction.type} style={styles.reactionEmoji}>
-              {reaction.type}
-            </Text>
-          ))}
-          <Text style={styles.statsText}>{post.totalReactions}</Text>
-        </View>
-        <View style={styles.statsRight}>
-          <Text style={styles.statsText}>{post.commentsCount} comentários</Text>
-          <Text style={styles.dot}>•</Text>
-          <Eye size={14} color={Colors.mutedForeground} />
-          <Text style={styles.statsText}>{post.views}</Text>
+        <View style={styles.statsLeft}>
+          <View style={styles.statItem}>
+            <Heart size={16} color={Colors.red} fill={Colors.red} />
+            <Text style={styles.statsText}>{post.totalReactions}</Text>
+          </View>
+          <View style={styles.statItem}>
+            <MessageCircle size={16} color={Colors.mutedForeground} />
+            <Text style={styles.statsText}>{post.commentsCount} comentários</Text>
+          </View>
         </View>
       </View>
 
@@ -341,15 +336,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  reactionsContainer: {
+  statsLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 12,
   },
-  reactionEmoji: {
-    fontSize: 16,
-  },
-  statsRight: {
+  statItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
