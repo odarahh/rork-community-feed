@@ -9,7 +9,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-import { Paperclip, Send, Heart, X, FileText } from 'lucide-react-native';
+import { Paperclip, Heart, X, FileText } from 'lucide-react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import Colors from '@/constants/colors';
 import { Comment, Attachment } from '@/types/feed';
@@ -233,20 +233,13 @@ export default function CommentSection({ comments, onAddComment }: CommentSectio
             placeholderTextColor={Colors.mutedForeground}
             value={commentText}
             onChangeText={setCommentText}
+            onSubmitEditing={handleSubmitComment}
             multiline
           />
           <View style={styles.inputActions}>
             <TouchableOpacity style={styles.inputAction} onPress={handlePickFile}>
               <Paperclip size={20} color={Colors.mutedForeground} />
             </TouchableOpacity>
-            {(commentText.trim().length > 0 || attachments.length > 0) && (
-              <TouchableOpacity 
-                style={styles.submitButton} 
-                onPress={handleSubmitComment}
-              >
-                <Send size={20} color={Colors.blue} />
-              </TouchableOpacity>
-            )}
           </View>
         </View>
       </View>
