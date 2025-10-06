@@ -15,7 +15,6 @@ import {
   Heart,
   MessageCircle,
   Share2,
-  Send,
   MoreVertical,
   Pin,
   Bookmark,
@@ -39,6 +38,7 @@ type PostCardProps = {
   onToggleSave: (postId: string) => void;
   onTogglePin: (postId: string) => void;
   onToggleComments: (postId: string) => void;
+  onChangeChannel?: (postId: string) => void;
 };
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -49,6 +49,7 @@ export default function PostCard({
   onToggleSave,
   onTogglePin,
   onToggleComments,
+  onChangeChannel,
 }: PostCardProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -335,11 +336,6 @@ export default function PostCard({
         <TouchableOpacity style={styles.actionButton}>
           <Share2 size={20} color={Colors.mutedForeground} />
         </TouchableOpacity>
-
-        <TouchableOpacity style={styles.actionButton}>
-          <Send size={20} color={Colors.mutedForeground} />
-          <Text style={styles.actionText}>Enviar</Text>
-        </TouchableOpacity>
       </View>
 
       {showComments && (
@@ -430,6 +426,7 @@ export default function PostCard({
         onToggleSave={onToggleSave}
         onTogglePin={onTogglePin}
         onToggleComments={onToggleComments}
+        onChangeChannel={onChangeChannel}
       />
     </View>
   );

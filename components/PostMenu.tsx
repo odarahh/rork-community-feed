@@ -28,6 +28,7 @@ type PostMenuProps = {
   onToggleSave: (postId: string) => void;
   onTogglePin: (postId: string) => void;
   onToggleComments: (postId: string) => void;
+  onChangeChannel?: (postId: string) => void;
 };
 
 type MenuItemProps = {
@@ -60,6 +61,7 @@ export default function PostMenu({
   onToggleSave,
   onTogglePin,
   onToggleComments,
+  onChangeChannel,
 }: PostMenuProps) {
   const handleAction = (action: () => void) => {
     action();
@@ -108,7 +110,7 @@ export default function PostMenu({
           <MenuItem
             icon={<Settings size={20} color={Colors.mutedForeground} />}
             label="Alterar canal"
-            onPress={() => handleAction(() => console.log('Change channel'))}
+            onPress={() => handleAction(() => onChangeChannel?.(post.id))}
           />
 
           <MenuItem

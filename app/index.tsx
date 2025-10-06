@@ -77,6 +77,10 @@ export default function FeedScreen() {
     );
   };
 
+  const handleChangeChannel = (postId: string) => {
+    console.log('Change channel for post:', postId);
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
@@ -111,6 +115,7 @@ export default function FeedScreen() {
             onToggleSave={handleToggleSave}
             onTogglePin={handleTogglePin}
             onToggleComments={handleToggleComments}
+            onChangeChannel={handleChangeChannel}
           />
         ))}
       </ScrollView>
