@@ -6,29 +6,17 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
-  Text,
-  Modal,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Plus, ArrowLeftRight } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { mockPosts, currentUser } from '@/mocks/feedData';
 import { Post } from '@/types/feed';
 import PostCard from '@/components/PostCard';
 
-const channels = [
-  { id: '1', name: 'Geral' },
-  { id: '2', name: 'Anúncios' },
-  { id: '3', name: 'Discussões' },
-  { id: '4', name: 'Suporte' },
-  { id: '5', name: 'Feedback' },
-];
-
 export default function FeedScreen() {
   const insets = useSafeAreaInsets();
   const [posts, setPosts] = useState<Post[]>(mockPosts);
-  const [showChannelModal, setShowChannelModal] = useState(false);
-  const [selectedChannel, setSelectedChannel] = useState(channels[0]);
 
   const sortedPosts = posts.sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
@@ -89,11 +77,6 @@ export default function FeedScreen() {
     );
   };
 
-  const handleSelectChannel = (channel: typeof channels[0]) => {
-    setSelectedChannel(channel);
-    setShowChannelModal(false);
-  };
-
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
@@ -112,13 +95,7 @@ export default function FeedScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity 
-          style={styles.channelButton}
-          onPress={() => setShowChannelModal(true)}
-        >
-          <ArrowLeftRight size={16} color={Colors.blue} />
-          <Text style={styles.channelButtonText}>{selectedChannel.name}</Text>
-        </TouchableOpacity>
+
       </View>
 
       <ScrollView
@@ -137,42 +114,6 @@ export default function FeedScreen() {
           />
         ))}
       </ScrollView>
-
-      <Modal
-        visible={showChannelModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setShowChannelModal(false)}
-      >
-        <TouchableOpacity 
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowChannelModal(false)}
-        >
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Selecionar Canal</Text>
-            {channels.map((channel) => (
-              <TouchableOpacity
-                key={channel.id}
-                style={[
-                  styles.channelOption,
-                  selectedChannel.id === channel.id && styles.channelOptionSelected,
-                ]}
-                onPress={() => handleSelectChannel(channel)}
-              >
-                <Text
-                  style={[
-                    styles.channelOptionText,
-                    selectedChannel.id === channel.id && styles.channelOptionTextSelected,
-                  ]}
-                >
-                  {channel.name}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </TouchableOpacity>
-      </Modal>
     </View>
   );
 }
@@ -219,64 +160,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  channelButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    marginTop: 12,
-    backgroundColor: Colors.accent,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-  },
-  channelButtonText: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: Colors.blue,
-  },
+
   feed: {
     flex: 1,
   },
   feedContent: {
     paddingVertical: 8,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: Colors.card,
-    borderRadius: 16,
-    padding: 20,
-    width: '80%',
-    maxWidth: 400,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    color: Colors.primary,
-    marginBottom: 16,
-  },
-  channelOption: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 8,
-    backgroundColor: Colors.inputBackground,
-  },
-  channelOptionSelected: {
-    backgroundColor: Colors.blue,
-  },
-  channelOptionText: {
-    fontSize: 15,
-    fontWeight: '500' as const,
-    color: Colors.primary,
-  },
-  channelOptionTextSelected: {
-    color: Colors.primaryForeground,
-    fontWeight: '600' as const,
   },
 });
