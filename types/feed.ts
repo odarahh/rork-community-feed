@@ -1,3 +1,5 @@
+import { TextSegment } from '@/components/RichTextEditor';
+
 export type User = {
   id: string;
   name: string;
@@ -48,7 +50,7 @@ export type Post = {
   timestamp: string;
   location?: string;
   title?: string;
-  content: string;
+  content: string | TextSegment[];
   media?: Media;
   reactions: Reaction[];
   totalReactions: number;

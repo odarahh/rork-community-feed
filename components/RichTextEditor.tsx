@@ -33,9 +33,21 @@ type FormatType =
   | 'ol'
   | 'link';
 
+export type TextSegment = {
+  text: string;
+  bold?: boolean;
+  italic?: boolean;
+  strikethrough?: boolean;
+  underline?: boolean;
+  code?: boolean;
+  h2?: boolean;
+  h3?: boolean;
+  link?: string;
+};
+
 type RichTextEditorProps = {
-  content: string;
-  onContentChange: (content: string) => void;
+  content: TextSegment[];
+  onContentChange: (content: TextSegment[]) => void;
   placeholder?: string;
 };
 
@@ -45,6 +57,7 @@ const RichTextEditor = forwardRef((props: RichTextEditorProps, ref) => {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [selection, setSelection] = useState({ start: 0, end: 0 });
   const inputRef = useRef<TextInput>(null);
+  const [plainText, setPlainText] = useState('');
 
   useImperativeHandle(ref, () => ({
     focus: () => {
@@ -55,71 +68,103 @@ const RichTextEditor = forwardRef((props: RichTextEditorProps, ref) => {
     },
   }));
 
+  React.useEffect(() => {
+    const text = content.map(seg => seg.text).join('');
+    setPlainText(text);
+  }, [content]);
+
   const handleSelectionChange = (event: any) => {
     const { start, end } = event.nativeEvent.selection;
     setSelection({ start, end });
     setShowToolbar(start !== end);
   };
 
+  const handleTextChange = (text: string) => {
+    setPlainText(text);
+    onContentChange([{ text }]);
+  };
+
   const applyFormat = (format: FormatType) => {
     const { start, end } = selection;
     if (start === end) return;
 
-    const selectedText = content.substring(start, end);
-    let formattedText = '';
+    const selectedText = plainText.substring(start, end);
+    const beforeText = plainText.substring(0, start);
+    const afterText = plainText.substring(end);
 
+    const newSegments: TextSegment[] = [];
+    
+    if (beforeText) {
+      newSegments.push({ text: beforeText });
+    }
+
+    const formattedSegment: TextSegment = { text: selectedText };
+    
     switch (format) {
       case 'bold':
-        formattedText = `**${selectedText}**`;
+        formattedSegment.bold = true;
         break;
       case 'italic':
-        formattedText = `*${selectedText}*`;
+        formattedSegment.italic = true;
         break;
       case 'strikethrough':
-        formattedText = `~~${selectedText}~~`;
+        formattedSegment.strikethrough = true;
         break;
       case 'underline':
-        formattedText = `__${selectedText}__`;
+        formattedSegment.underline = true;
         break;
       case 'code':
-        formattedText = `\`${selectedText}\``;
+        formattedSegment.code = true;
         break;
       case 'h2':
-        formattedText = `## ${selectedText}`;
+        formattedSegment.h2 = true;
         break;
       case 'h3':
-        formattedText = `### ${selectedText}`;
+        formattedSegment.h3 = true;
         break;
       case 'ul':
-        formattedText = selectedText
+        formattedSegment.text = selectedText
           .split('\n')
           .map((line) => `• ${line}`)
           .join('\n');
         break;
       case 'ol':
-        formattedText = selectedText
+        formattedSegment.text = selectedText
           .split('\n')
           .map((line, i) => `${i + 1}. ${line}`)
           .join('\n');
         break;
-      default:
-        formattedText = selectedText;
     }
 
-    const newContent =
-      content.substring(0, start) + formattedText + content.substring(end);
-    onContentChange(newContent);
+    newSegments.push(formattedSegment);
+
+    if (afterText) {
+      newSegments.push({ text: afterText });
+    }
+
+    onContentChange(newSegments);
     setShowToolbar(false);
   };
 
   const handleInsertLink = (url: string, text: string) => {
     const { start, end } = selection;
-    const linkText = start !== end ? content.substring(start, end) : text;
-    const formattedLink = `[${linkText}](${url})`;
+    const linkText = start !== end ? plainText.substring(start, end) : text;
+    const beforeText = plainText.substring(0, start);
+    const afterText = plainText.substring(end);
 
-    const newContent =
-      content.substring(0, start) + formattedLink + content.substring(end);
-    onContentChange(newContent);
+    const newSegments: TextSegment[] = [];
+    
+    if (beforeText) {
+      newSegments.push({ text: beforeText });
+    }
+
+    newSegments.push({ text: linkText, link: url });
+
+    if (afterText) {
+      newSegments.push({ text: afterText });
+    }
+
+    onContentChange(newSegments);
     setShowToolbar(false);
   };
 
@@ -130,8 +175,8 @@ const RichTextEditor = forwardRef((props: RichTextEditorProps, ref) => {
         style={styles.input}
         placeholder={placeholder || 'O que você está pensando?'}
         placeholderTextColor={Colors.mutedForeground}
-        value={content}
-        onChangeText={onContentChange}
+        value={plainText}
+        onChangeText={handleTextChange}
         onSelectionChange={handleSelectionChange}
         multiline
         textAlignVertical="top"

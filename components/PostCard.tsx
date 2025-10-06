@@ -31,6 +31,7 @@ import Colors from '@/constants/colors';
 import { Post, Attachment } from '@/types/feed';
 import PostMenu from './PostMenu';
 import CommentSection from './CommentSection';
+import RichTextRenderer from './RichTextRenderer';
 
 type PostCardProps = {
   post: Post;
@@ -181,7 +182,11 @@ export default function PostCard({
 
       <View style={styles.content}>
         {post.title && <Text style={styles.titleText}>{post.title}</Text>}
-        <Text style={styles.contentText}>{post.content}</Text>
+        {typeof post.content === 'string' ? (
+          <Text style={styles.contentText}>{post.content}</Text>
+        ) : (
+          <RichTextRenderer segments={post.content} />
+        )}
       </View>
 
       {post.media && post.media.type === 'image' && (

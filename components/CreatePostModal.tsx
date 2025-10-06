@@ -22,7 +22,7 @@ import {
   Paperclip,
 } from 'lucide-react-native';
 import Colors from '@/constants/colors';
-import RichTextEditor from './RichTextEditor';
+import RichTextEditor, { TextSegment } from './RichTextEditor';
 import EmojiPicker from './EmojiPicker';
 import ImageUploaderDropdown from './ImageUploaderDropdown';
 import FileUploaderDropdown from './FileUploaderDropdown';
@@ -44,7 +44,7 @@ export default function CreatePostModal({
 }: CreatePostModalProps) {
   const [isMaximized, setIsMaximized] = useState(false);
   const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState<TextSegment[]>([{ text: '' }]);
   const [selectedChannel, setSelectedChannel] = useState('Geral');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showChannelSelector, setShowChannelSelector] = useState(false);
@@ -61,7 +61,7 @@ export default function CreatePostModal({
 
   const handleClose = () => {
     setTitle('');
-    setContent('');
+    setContent([{ text: '' }]);
     setBannerImages([]);
     setBodyImages([]);
     setFiles([]);
@@ -73,7 +73,8 @@ export default function CreatePostModal({
   };
 
   const handlePublish = async () => {
-    if (!content.trim() && bannerImages.length === 0 && bodyImages.length === 0) {
+    const contentText = content.map(seg => seg.text).join('');
+    if (!contentText.trim() && bannerImages.length === 0 && bodyImages.length === 0) {
       return;
     }
 
@@ -81,7 +82,7 @@ export default function CreatePostModal({
 
     const postData = {
       title: title.trim() || undefined,
-      content: content.trim(),
+      content,
       channel: selectedChannel,
       bannerImages,
       bodyImages,
@@ -98,7 +99,7 @@ export default function CreatePostModal({
     }, 1000);
   };
 
-  const canPublish = content.trim().length > 0 || bannerImages.length > 0 || bodyImages.length > 0;
+  const canPublish = content.map(seg => seg.text).join('').trim().length > 0 || bannerImages.length > 0 || bodyImages.length > 0;
 
   const handleFormatSelect = (format: string) => {
     if (!editorRef.current) return;
@@ -359,7 +360,10 @@ export default function CreatePostModal({
         visible={showEmojiPicker}
         onClose={() => setShowEmojiPicker(false)}
         onEmojiSelect={(emoji: string) => {
-          setContent(content + emoji);
+          const lastSegment = content[content.length - 1];
+          const newContent = [...content];
+          newContent[newContent.length - 1] = { ...lastSegment, text: lastSegment.text + emoji };
+          setContent(newContent);
           setShowEmojiPicker(false);
         }}
       />
