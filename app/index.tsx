@@ -16,6 +16,7 @@ import Colors from '@/constants/colors';
 import { mockPosts, currentUser } from '@/mocks/feedData';
 import { Post } from '@/types/feed';
 import PostCard from '@/components/PostCard';
+import CreatePostModal from '@/components/CreatePostModal';
 
 const CHANNELS = [
   { id: '1', name: 'Produtividade' },
@@ -44,6 +45,7 @@ export default function FeedScreen() {
   const [showChannelModal, setShowChannelModal] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState<string>('1');
+  const [showCreatePostModal, setShowCreatePostModal] = useState(false);
 
   const sortedPosts = posts.sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
@@ -121,6 +123,38 @@ export default function FeedScreen() {
     setSelectedPostId(null);
   };
 
+  const handlePublishPost = (postData: any) => {
+    console.log('Publishing post:', postData);
+    const newPost: Post = {
+      id: `post-${Date.now()}`,
+      author: currentUser,
+      timestamp: 'Agora',
+      location: postData.channel,
+      title: postData.title,
+      content: postData.content,
+      media: postData.bannerImages.length > 0
+        ? { type: 'banner', url: postData.bannerImages[0] }
+        : postData.bodyImages.length > 0
+        ? { type: 'gallery', url: postData.bodyImages }
+        : undefined,
+      reactions: [
+        { type: '👍', count: 0, userReacted: false },
+        { type: '❤️', count: 0, userReacted: false },
+        { type: '💡', count: 0, userReacted: false },
+        { type: '🎉', count: 0, userReacted: false },
+        { type: '🔥', count: 0, userReacted: false },
+      ],
+      totalReactions: 0,
+      commentsCount: 0,
+      comments: [],
+      shares: 0,
+      views: 0,
+      isPinned: false,
+      isSaved: false,
+    };
+    setPosts([newPost, ...posts]);
+  };
+
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
@@ -134,7 +168,10 @@ export default function FeedScreen() {
               editable={false}
             />
           </View>
-          <TouchableOpacity style={styles.addButton}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setShowCreatePostModal(true)}
+          >
             <Plus size={24} color={Colors.blue} />
           </TouchableOpacity>
         </View>
@@ -217,6 +254,12 @@ export default function FeedScreen() {
           </View>
         </Pressable>
       </Modal>
+
+      <CreatePostModal
+        visible={showCreatePostModal}
+        onClose={() => setShowCreatePostModal(false)}
+        onPublish={handlePublishPost}
+      />
     </View>
   );
 }
