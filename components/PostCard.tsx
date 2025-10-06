@@ -149,9 +149,6 @@ export default function PostCard({
                 </View>
               )}
             </View>
-            {post.author.role && (
-              <Text style={styles.authorRole}>{post.author.role}</Text>
-            )}
             <View style={styles.metaRow}>
               <Text style={styles.timestamp}>{post.timestamp}</Text>
               {post.location && (
