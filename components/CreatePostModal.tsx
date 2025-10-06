@@ -29,6 +29,7 @@ import FileUploaderDropdown from './FileUploaderDropdown';
 import VideoUploaderDropdown from './VideoUploaderDropdown';
 import ScheduleModal from './ScheduleModal';
 import ChannelSelector from './ChannelSelector';
+import TextFormattingDropdown from './TextFormattingDropdown';
 
 type CreatePostModalProps = {
   visible: boolean;
@@ -98,6 +99,11 @@ export default function CreatePostModal({
   };
 
   const canPublish = content.trim().length > 0 || bannerImages.length > 0 || bodyImages.length > 0;
+
+  const handleFormatSelect = (format: string) => {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+  };
 
   return (
     <Modal
@@ -266,6 +272,8 @@ export default function CreatePostModal({
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.toolbarContent}
             >
+              <TextFormattingDropdown onFormatSelect={handleFormatSelect} />
+
               <TouchableOpacity
                 style={styles.toolButton}
                 onPress={() => setShowEmojiPicker(true)}
