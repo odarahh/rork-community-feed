@@ -6,17 +6,34 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
+  Modal,
+  Text,
+  Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Plus } from 'lucide-react-native';
+import { Plus, Check } from 'lucide-react-native';
 import Colors from '@/constants/colors';
 import { mockPosts, currentUser } from '@/mocks/feedData';
 import { Post } from '@/types/feed';
 import PostCard from '@/components/PostCard';
 
+const CHANNELS = [
+  { id: '1', name: 'Produtividade' },
+  { id: '2', name: 'Anúncios' },
+  { id: '3', name: 'Design' },
+  { id: '4', name: 'Negócios' },
+  { id: '5', name: 'Tecnologia' },
+  { id: '6', name: 'Produto' },
+  { id: '7', name: 'Conteúdo' },
+  { id: '8', name: 'Recursos' },
+  { id: '9', name: 'Reflexões' },
+];
+
 export default function FeedScreen() {
   const insets = useSafeAreaInsets();
   const [posts, setPosts] = useState<Post[]>(mockPosts);
+  const [showChannelModal, setShowChannelModal] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   const sortedPosts = posts.sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
@@ -78,7 +95,20 @@ export default function FeedScreen() {
   };
 
   const handleChangeChannel = (postId: string) => {
-    console.log('Change channel for post:', postId);
+    setSelectedPostId(postId);
+    setShowChannelModal(true);
+  };
+
+  const handleSelectChannel = (channelName: string) => {
+    if (selectedPostId) {
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === selectedPostId ? { ...post, location: channelName } : post
+        )
+      );
+    }
+    setShowChannelModal(false);
+    setSelectedPostId(null);
   };
 
   return (
@@ -119,6 +149,46 @@ export default function FeedScreen() {
           />
         ))}
       </ScrollView>
+
+      <Modal
+        visible={showChannelModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowChannelModal(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setShowChannelModal(false)}>
+          <View style={styles.channelModal}>
+            <Text style={styles.channelModalTitle}>Alterar canal</Text>
+            <Text style={styles.channelModalSubtitle}>Selecione o novo canal para esta postagem</Text>
+            <ScrollView style={styles.channelList}>
+              {CHANNELS.map((channel) => {
+                const currentPost = posts.find((p) => p.id === selectedPostId);
+                const isSelected = currentPost?.location === channel.name;
+                return (
+                  <TouchableOpacity
+                    key={channel.id}
+                    style={[
+                      styles.channelItem,
+                      isSelected && styles.channelItemSelected,
+                    ]}
+                    onPress={() => handleSelectChannel(channel.name)}
+                  >
+                    <Text
+                      style={[
+                        styles.channelItemText,
+                        isSelected && styles.channelItemTextSelected,
+                      ]}
+                    >
+                      {channel.name}
+                    </Text>
+                    {isSelected && <Check size={20} color={Colors.blue} />}
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -171,5 +241,62 @@ const styles = StyleSheet.create({
   },
   feedContent: {
     paddingVertical: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  channelModal: {
+    backgroundColor: Colors.card,
+    borderRadius: 16,
+    width: '100%',
+    maxWidth: 400,
+    maxHeight: '70%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  channelModalTitle: {
+    fontSize: 20,
+    fontWeight: '700' as const,
+    color: Colors.primary,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 8,
+  },
+  channelModalSubtitle: {
+    fontSize: 14,
+    color: Colors.mutedForeground,
+    paddingHorizontal: 20,
+    paddingBottom: 16,
+  },
+  channelList: {
+    maxHeight: 400,
+  },
+  channelItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  channelItemSelected: {
+    backgroundColor: Colors.accent,
+  },
+  channelItemText: {
+    fontSize: 16,
+    color: Colors.primary,
+    fontWeight: '500' as const,
+  },
+  channelItemTextSelected: {
+    color: Colors.blue,
+    fontWeight: '600' as const,
   },
 });
