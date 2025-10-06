@@ -29,11 +29,21 @@ const CHANNELS = [
   { id: '9', name: 'Reflexões' },
 ];
 
+const FILTER_TAGS = [
+  { id: '1', label: 'Últimas atividades' },
+  { id: '2', label: 'Relevantes' },
+  { id: '3', label: 'Recentes' },
+  { id: '4', label: 'Mais antigas' },
+  { id: '5', label: 'Minhas postagens' },
+  { id: '6', label: 'Salvos' },
+];
+
 export default function FeedScreen() {
   const insets = useSafeAreaInsets();
   const [posts, setPosts] = useState<Post[]>(mockPosts);
   const [showChannelModal, setShowChannelModal] = useState(false);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<string>('1');
 
   const sortedPosts = posts.sort((a, b) => {
     if (a.isPinned && !b.isPinned) return -1;
@@ -129,7 +139,25 @@ export default function FeedScreen() {
           </TouchableOpacity>
         </View>
 
-
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.tagsContainer}
+          contentContainerStyle={styles.tagsContent}
+        >
+          {FILTER_TAGS.map((tag) => (
+            <TouchableOpacity
+              key={tag.id}
+              style={[
+                styles.tag,
+                selectedFilter === tag.id && styles.tagSelected,
+              ]}
+              onPress={() => setSelectedFilter(tag.id)}
+            >
+              <Text style={styles.tagText}>{tag.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
       </View>
 
       <ScrollView
@@ -235,7 +263,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
+  tagsContainer: {
+    marginTop: 16,
+  },
+  tagsContent: {
+    paddingRight: 16,
+    gap: 8,
+  },
+  tag: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(37, 99, 235, 0.3)',
+  },
+  tagSelected: {
+    backgroundColor: 'rgba(37, 99, 235, 0.5)',
+  },
+  tagText: {
+    fontSize: 14,
+    fontWeight: '500' as const,
+    color: Colors.blue,
+  },
   feed: {
     flex: 1,
   },
