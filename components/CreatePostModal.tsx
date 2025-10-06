@@ -24,7 +24,7 @@ import {
 import Colors from '@/constants/colors';
 import RichTextEditor from './RichTextEditor';
 import EmojiPicker from './EmojiPicker';
-import ImageUploader from './ImageUploader';
+import ImageUploaderDropdown from './ImageUploaderDropdown';
 import FileUploader from './FileUploader';
 import VideoUploader from './VideoUploader';
 import VideoLinkModal from './VideoLinkModal';
@@ -275,24 +275,20 @@ export default function CreatePostModal({
                 <Smile size={20} color={Colors.mutedForeground} />
               </TouchableOpacity>
 
-              <ImageUploader
-                onImagesSelected={(images: string[]) => {
-                  if (bannerImages.length + images.length <= 10) {
-                    setBannerImages([...bannerImages, ...images]);
+              <ImageUploaderDropdown
+                onImagesSelected={(images: string[], type: 'banner' | 'body') => {
+                  if (type === 'banner') {
+                    if (bannerImages.length + images.length <= 10) {
+                      setBannerImages([...bannerImages, ...images]);
+                    }
+                  } else {
+                    if (bodyImages.length + images.length <= 10) {
+                      setBodyImages([...bodyImages, ...images]);
+                    }
                   }
                 }}
-                maxImages={10 - bannerImages.length}
-                type="banner"
-              />
-
-              <ImageUploader
-                onImagesSelected={(images: string[]) => {
-                  if (bodyImages.length + images.length <= 10) {
-                    setBodyImages([...bodyImages, ...images]);
-                  }
-                }}
-                maxImages={10 - bodyImages.length}
-                type="body"
+                maxBannerImages={10 - bannerImages.length}
+                maxBodyImages={10 - bodyImages.length}
               />
 
               <FileUploader
