@@ -25,9 +25,8 @@ import Colors from '@/constants/colors';
 import RichTextEditor from './RichTextEditor';
 import EmojiPicker from './EmojiPicker';
 import ImageUploaderDropdown from './ImageUploaderDropdown';
-import FileUploader from './FileUploader';
-import VideoUploader from './VideoUploader';
-import VideoLinkModal from './VideoLinkModal';
+import FileUploaderDropdown from './FileUploaderDropdown';
+import VideoUploaderDropdown from './VideoUploaderDropdown';
 import ScheduleModal from './ScheduleModal';
 import ChannelSelector from './ChannelSelector';
 
@@ -49,7 +48,6 @@ export default function CreatePostModal({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showChannelSelector, setShowChannelSelector] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
-  const [showVideoLinkModal, setShowVideoLinkModal] = useState(false);
   const [scheduledDate, setScheduledDate] = useState<Date | null>(null);
   const [bannerImages, setBannerImages] = useState<string[]>([]);
   const [bodyImages, setBodyImages] = useState<string[]>([]);
@@ -291,7 +289,7 @@ export default function CreatePostModal({
                 maxBodyImages={10 - bodyImages.length}
               />
 
-              <FileUploader
+              <FileUploaderDropdown
                 onFilesSelected={(newFiles: { name: string; size: string; uri: string }[]) => {
                   if (files.length + newFiles.length <= 10) {
                     setFiles([...files, ...newFiles]);
@@ -300,21 +298,20 @@ export default function CreatePostModal({
                 maxFiles={10 - files.length}
               />
 
-              <VideoUploader
+              <VideoUploaderDropdown
                 onVideosSelected={(newVideos: { uri: string; thumbnail: string }[]) => {
                   if (videos.length + newVideos.length <= 5) {
                     setVideos([...videos, ...newVideos]);
                   }
                 }}
+                onVideoLinkAdded={(link: { platform: string; url: string }) => {
+                  if (videoLinks.length < 10) {
+                    setVideoLinks([...videoLinks, link]);
+                  }
+                }}
                 maxVideos={5 - videos.length}
+                maxVideoLinks={10 - videoLinks.length}
               />
-
-              <TouchableOpacity
-                style={styles.toolButton}
-                onPress={() => setShowVideoLinkModal(true)}
-              >
-                <VideoIcon size={20} color={Colors.mutedForeground} />
-              </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.toolButton}
@@ -378,16 +375,7 @@ export default function CreatePostModal({
         }}
       />
 
-      <VideoLinkModal
-        visible={showVideoLinkModal}
-        onClose={() => setShowVideoLinkModal(false)}
-        onAddLink={(link: { platform: string; url: string }) => {
-          if (videoLinks.length < 10) {
-            setVideoLinks([...videoLinks, link]);
-          }
-          setShowVideoLinkModal(false);
-        }}
-      />
+
     </Modal>
   );
 }
