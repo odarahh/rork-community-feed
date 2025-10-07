@@ -328,7 +328,9 @@ export default function CreatePostModal({
               >
                 <Calendar size={20} color={Colors.mutedForeground} />
               </TouchableOpacity>
+            </ScrollView>
 
+            <View style={styles.channelButtonContainer}>
               <TouchableOpacity
                 style={styles.channelButton}
                 onPress={() => setShowChannelSelector(true)}
@@ -337,7 +339,7 @@ export default function CreatePostModal({
                 <Text style={styles.channelButtonText}>{selectedChannel}</Text>
                 <ChevronDown size={16} color={Colors.blue} />
               </TouchableOpacity>
-            </ScrollView>
+            </View>
           </View>
 
           <View style={styles.footer}>
@@ -608,6 +610,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 12,
     alignItems: 'center',
+  },
+  channelButtonContainer: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
   },
   toolButton: {
     width: 40,
