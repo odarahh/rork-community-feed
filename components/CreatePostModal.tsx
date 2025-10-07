@@ -9,6 +9,8 @@ import {
   ScrollView,
   Image,
   ActivityIndicator,
+  PanResponder,
+  Animated,
 } from 'react-native';
 import {
   X,
@@ -57,6 +59,7 @@ export default function CreatePostModal({
   const [videoLinks, setVideoLinks] = useState<any[]>([]);
   const [isPublishing, setIsPublishing] = useState(false);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const editorRef = useRef<any>(null);
 
@@ -186,16 +189,32 @@ export default function CreatePostModal({
                   <View style={styles.carouselThumbnails}>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                       {bannerImages.map((uri, index) => (
-                        <TouchableOpacity
+                        <DraggableThumbnail
                           key={index}
+                          uri={uri}
+                          index={index}
+                          isActive={index === currentBannerIndex}
+                          isDragged={draggedIndex === index}
                           onPress={() => setCurrentBannerIndex(index)}
-                          style={[
-                            styles.thumbnailContainer,
-                            index === currentBannerIndex && styles.thumbnailContainerActive,
-                          ]}
-                        >
-                          <Image source={{ uri }} style={styles.thumbnailImage} />
-                        </TouchableOpacity>
+                          onDragStart={() => setDraggedIndex(index)}
+                          onDragEnd={(toIndex: number) => {
+                            if (toIndex !== index && toIndex >= 0 && toIndex < bannerImages.length) {
+                              const newImages = [...bannerImages];
+                              const [removed] = newImages.splice(index, 1);
+                              newImages.splice(toIndex, 0, removed);
+                              setBannerImages(newImages);
+                              
+                              if (currentBannerIndex === index) {
+                                setCurrentBannerIndex(toIndex);
+                              } else if (currentBannerIndex > index && currentBannerIndex <= toIndex) {
+                                setCurrentBannerIndex(currentBannerIndex - 1);
+                              } else if (currentBannerIndex < index && currentBannerIndex >= toIndex) {
+                                setCurrentBannerIndex(currentBannerIndex + 1);
+                              }
+                            }
+                            setDraggedIndex(null);
+                          }}
+                        />
                       ))}
                     </ScrollView>
                   </View>
@@ -434,6 +453,99 @@ export default function CreatePostModal({
   );
 }
 
+type DraggableThumbnailProps = {
+  uri: string;
+  index: number;
+  isActive: boolean;
+  isDragged: boolean;
+  onPress: () => void;
+  onDragStart: () => void;
+  onDragEnd: (toIndex: number) => void;
+};
+
+function DraggableThumbnail({
+  uri,
+  index,
+  isActive,
+  isDragged,
+  onPress,
+  onDragStart,
+  onDragEnd,
+}: DraggableThumbnailProps) {
+  const pan = useRef(new Animated.ValueXY()).current;
+  const scale = useRef(new Animated.Value(1)).current;
+  const [layout, setLayout] = useState({ x: 0, width: 68 });
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (_, gestureState) => {
+        return Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
+      },
+      onPanResponderGrant: () => {
+        onDragStart();
+        Animated.spring(scale, {
+          toValue: 1.1,
+          useNativeDriver: true,
+        }).start();
+      },
+      onPanResponderMove: (_, gestureState) => {
+        pan.setValue({ x: gestureState.dx, y: 0 });
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const movedDistance = gestureState.dx;
+        const thumbnailWidth = layout.width;
+        const positionsMoved = Math.round(movedDistance / thumbnailWidth);
+        const newIndex = index + positionsMoved;
+
+        Animated.parallel([
+          Animated.spring(pan, {
+            toValue: { x: 0, y: 0 },
+            useNativeDriver: true,
+          }),
+          Animated.spring(scale, {
+            toValue: 1,
+            useNativeDriver: true,
+          }),
+        ]).start();
+
+        onDragEnd(newIndex);
+      },
+    })
+  ).current;
+
+  return (
+    <Animated.View
+      {...panResponder.panHandlers}
+      onLayout={(e) => {
+        setLayout({
+          x: e.nativeEvent.layout.x,
+          width: e.nativeEvent.layout.width,
+        });
+      }}
+      style={[
+        styles.thumbnailContainer,
+        isActive && styles.thumbnailContainerActive,
+        isDragged && styles.thumbnailContainerDragged,
+        {
+          transform: [
+            { translateX: pan.x },
+            { scale: scale },
+          ],
+        },
+      ]}
+    >
+      <TouchableOpacity
+        onPress={onPress}
+        activeOpacity={0.8}
+        style={styles.thumbnailTouchable}
+      >
+        <Image source={{ uri }} style={styles.thumbnailImage} />
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -556,9 +668,20 @@ const styles = StyleSheet.create({
   thumbnailContainerActive: {
     borderColor: Colors.blue,
   },
-  thumbnailImage: {
+  thumbnailContainerDragged: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  thumbnailTouchable: {
     width: 60,
     height: 60,
+  },
+  thumbnailImage: {
+    width: '100%',
+    height: '100%',
   },
   removeImageButton: {
     position: 'absolute',
