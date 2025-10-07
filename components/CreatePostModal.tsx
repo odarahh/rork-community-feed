@@ -56,6 +56,7 @@ export default function CreatePostModal({
   const [videos, setVideos] = useState<any[]>([]);
   const [videoLinks, setVideoLinks] = useState<any[]>([]);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
 
   const editorRef = useRef<any>(null);
 
@@ -145,21 +146,60 @@ export default function CreatePostModal({
 
             {bannerImages.length > 0 && (
               <View style={styles.bannerSection}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {bannerImages.map((uri, index) => (
-                    <View key={index} style={styles.bannerImageContainer}>
-                      <Image source={{ uri }} style={styles.bannerImage} />
-                      <TouchableOpacity
-                        style={styles.removeImageButton}
-                        onPress={() =>
-                          setBannerImages(bannerImages.filter((_, i) => i !== index))
-                        }
-                      >
-                        <X size={16} color={Colors.primaryForeground} />
-                      </TouchableOpacity>
+                <View style={styles.carouselContainer}>
+                  <Image 
+                    source={{ uri: bannerImages[currentBannerIndex] }} 
+                    style={styles.carouselImage} 
+                  />
+                  <TouchableOpacity
+                    style={styles.removeCarouselImageButton}
+                    onPress={() => {
+                      const newImages = bannerImages.filter((_, i) => i !== currentBannerIndex);
+                      setBannerImages(newImages);
+                      if (currentBannerIndex >= newImages.length && newImages.length > 0) {
+                        setCurrentBannerIndex(newImages.length - 1);
+                      } else if (newImages.length === 0) {
+                        setCurrentBannerIndex(0);
+                      }
+                    }}
+                  >
+                    <X size={16} color={Colors.primaryForeground} />
+                  </TouchableOpacity>
+                  
+                  {bannerImages.length > 1 && (
+                    <View style={styles.carouselIndicators}>
+                      {bannerImages.map((_, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          style={[
+                            styles.indicator,
+                            index === currentBannerIndex && styles.indicatorActive,
+                          ]}
+                          onPress={() => setCurrentBannerIndex(index)}
+                        />
+                      ))}
                     </View>
-                  ))}
-                </ScrollView>
+                  )}
+                </View>
+                
+                {bannerImages.length > 1 && (
+                  <View style={styles.carouselThumbnails}>
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                      {bannerImages.map((uri, index) => (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => setCurrentBannerIndex(index)}
+                          style={[
+                            styles.thumbnailContainer,
+                            index === currentBannerIndex && styles.thumbnailContainerActive,
+                          ]}
+                        >
+                          <Image source={{ uri }} style={styles.thumbnailImage} />
+                        </TouchableOpacity>
+                      ))}
+                    </ScrollView>
+                  </View>
+                )}
               </View>
             )}
 
@@ -463,14 +503,62 @@ const styles = StyleSheet.create({
   bannerSection: {
     marginBottom: 16,
   },
-  bannerImageContainer: {
+  carouselContainer: {
     position: 'relative',
-    marginRight: 12,
+    width: '100%',
+    height: 240,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: Colors.muted,
   },
-  bannerImage: {
-    width: 200,
-    height: 120,
+  carouselImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  removeCarouselImageButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    borderRadius: 16,
+    padding: 6,
+  },
+  carouselIndicators: {
+    position: 'absolute',
+    bottom: 12,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+  },
+  indicatorActive: {
+    backgroundColor: Colors.primaryForeground,
+    width: 24,
+  },
+  carouselThumbnails: {
+    marginTop: 12,
+  },
+  thumbnailContainer: {
+    marginRight: 8,
     borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  thumbnailContainerActive: {
+    borderColor: Colors.blue,
+  },
+  thumbnailImage: {
+    width: 60,
+    height: 60,
   },
   removeImageButton: {
     position: 'absolute',
