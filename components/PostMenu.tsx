@@ -10,7 +10,6 @@ import {
 import {
   Bookmark,
   BookmarkCheck,
-  CheckCircle,
   Pin,
   PinOff,
   Settings,
@@ -87,12 +86,6 @@ export default function PostMenu({
             }
             label={post.isSaved ? 'Remover dos salvos' : 'Salvar'}
             onPress={() => handleAction(() => onToggleSave(post.id))}
-          />
-
-          <MenuItem
-            icon={<CheckCircle size={20} color={Colors.mutedForeground} />}
-            label="Marcar como lido"
-            onPress={() => handleAction(() => console.log('Mark as read'))}
           />
 
           <MenuItem
